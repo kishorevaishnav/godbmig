@@ -1,0 +1,24 @@
+{
+    "id": 20130106222315,
+    "up": {
+        "add_column": [
+            [
+                "asdfasd",
+                "asdfasd",
+                "asdfAS"
+            ],
+            [
+                "asdf",
+                "asdf",
+                "asdfasf"
+            ]
+        ]
+    },
+    "down": {
+        "remove_column": {
+            "seasons": {
+                "start_date": "date"
+            }
+        }
+    }
+}

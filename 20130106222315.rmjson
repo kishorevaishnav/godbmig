@@ -1,0 +1,19 @@
+{
+    "migration": {
+    	"id": 20130106222315,
+        "up": {
+            "action": "add_column",
+            "tablename": "seasons",
+            "column": {
+                "start_date": "date"
+            }
+        },
+        "down": {
+            "action": "remove_column",
+            "tablename": "seasons",
+            "column": {
+                "start_date": "date"
+            }
+        }
+    }
+}
