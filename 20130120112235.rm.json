@@ -1,0 +1,45 @@
+{
+    "id": "20130120112233",
+    "up": {
+        "add_index": [
+            {
+                "table_name": "seasons",
+                "index_type": "unique",
+                "columns": [
+                    { "fieldname": "col1" },
+                    { "fieldname": "col2" },
+                    { "fieldname": "col3" },
+                    { "fieldname": "col4" }
+                ]            
+            },
+            {
+                "table_name": "seasons",
+                "index_type": "primary key",
+                "columns": [
+                    { "fieldname": "col1" }
+                ]            
+            }
+        ]
+    },
+    "down": {
+        "remove_index": [
+            {
+                "table_name": "seasons",
+                "index_type": "unique",
+                "columns": [
+                    { "fieldname": "col1" },
+                    { "fieldname": "col2" },
+                    { "fieldname": "col3" },
+                    { "fieldname": "col4" }
+                ]            
+            },
+            {
+                "table_name": "seasons",
+                "index_type": "primary key",
+                "columns": [
+                    { "fieldname": "col1" }
+                ]            
+            }
+        ]
+    }
+}

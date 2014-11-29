@@ -1,0 +1,62 @@
+{
+    "id": "20120106222315",
+    "up": {
+        "add_column": [
+            {
+                "table_name": "seasons",
+                "column_name": "name",
+                "data_type": "varchar"
+            },
+            {
+                "table_name": "seasons1",
+                "column_name": "name1",
+                "data_type": "varchar1"
+            }
+        ],
+        "remove_column": [
+            {
+                "table_name": "tb1",
+                "column_name": "col1"
+            },
+            {
+                "table_name": "tb2",
+                "column_name": "col2"
+            }
+        ],
+        "create_table": [
+            {
+                "table_name": "tb3",
+                "columns": [
+                    {
+                        "fieldname": "col1",
+                        "datatype": "dt1"
+                    },
+                    {
+                        "fieldname": "col2",
+                        "datatype": "dt2"
+                    },
+                    {
+                        "fieldname": "col3",
+                        "datatype": "dt3"
+                    },
+                    {
+                        "fieldname": "col4",
+                        "datatype": "dt4"
+                    }
+                ]
+            }
+        ]
+    },
+    "down": {
+        "remove_column": [
+            {
+                "table_name": "rtb1",
+                "column_name": "rcol1"
+            },
+            {
+                "table_name": "rtb2",
+                "column_name": "rcol2"
+            }
+        ]
+    }
+}

@@ -1,0 +1,29 @@
+{
+    "id": "20120117112311",
+    "up": {
+        "add_column": [
+            {
+                "table_name": "seasons",
+                "column_name": "name",
+                "data_type": "varchar"
+            },
+            {
+                "table_name": "seasons1",
+                "column_name": "name1",
+                "data_type": "varchar1"
+            }
+        ]
+    },
+    "down": {
+        "remove_column": [
+            {
+                "table_name": "seasons1",
+                "column_name": "name1"
+            },
+            {
+                "table_name": "seasons",
+                "column_name": "name"
+            }
+        ]
+    }
+}
