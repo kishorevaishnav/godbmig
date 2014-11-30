@@ -1,4 +1,4 @@
-package mysql
+package postgres
 
 import (
 	"database/sql"
@@ -9,13 +9,13 @@ import (
 
 	m "../migration"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 var Db *sql.DB
 
 func Init() {
-	fmt.Println("Inside the MySQL")
+	fmt.Println("Inside the Postgres")
 	Db, _ = sql.Open("mysql", "root:root@/onetest")
 }
 
@@ -54,7 +54,7 @@ func ProcessNow(m m.Migration) {
 	}
 }
 func execQuery(query string) {
-	fmt.Println("MySQL---" + query)
+	fmt.Println("Postgres---" + query)
 	// q, err := Db.Query(query)
 	// if err != nil {
 	// 	log.Fatal(err)
