@@ -19,7 +19,7 @@ func Init() {
 	Db, _ = sql.Open("mysql", "root:root@/onetest")
 }
 
-func ProcessNow(m m.Migration) {
+func ProcessNow(m m.Migration, updown string) {
 	nid, _ := strconv.Atoi(m.Id)
 	if nid != 0 {
 		fmt.Println("ID : ", m.Id)
