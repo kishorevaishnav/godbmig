@@ -8,11 +8,12 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 
-	m "./migration"
+	m "github.com/kishorevaishnav/godbmig/migration"
 
-	gdm_my "./mysql"
-	gdm_pq "./postgres"
+	gdm_my "github.com/kishorevaishnav/godbmig/mysql"
+	gdm_pq "github.com/kishorevaishnav/godbmig/postgres"
 )
 
 const FIELD_DATATYPE_REGEXP = `^([A-Za-z]{2,15}):([A-Za-z]{2,15})`
@@ -35,32 +36,102 @@ func main() {
 	os.Exit(1)
 }
 
+// type migTemplate struct {
+// 	id       int64
+// 	mig_type string
+// 	tbl_name string
+// 	cols     []string
+// }
+
 func generateMigration() {
-	var gm m.Migration
-	ct := []gm.Create_Table{}
-	col := []gm.Columns{}
-	gm.Up.Create_Table[0].Table_Name = os.Args[3]
+	const layout = "20060102150405"
+	t := time.Now()
+	mm := m.Migration{}
+	mm.Id = "3" + t.Format(layout)
+	switch os.Args[2] {
+	case "create_table", "ct":
+		fn_create_table(&mm.Up)
+		fn_drop_table(&mm.Down)
+	case "drop_table", "dt":
+		fn_drop_table(&mm.Up)
+		fn_create_table(&mm.Down)
+	// case "rename_table", "rt":
+	// 	fn_rename_table(&mm.Up)
+	// 	fn_rename_table(&mm.Down)
+	case "add_column", "ac":
+		fn_add_column(&mm.Up)
+		fn_remove_column(&mm.Down)
+	case "remove_column", "rc":
+		fn_remove_column(&mm.Up)
+		fn_add_column(&mm.Down)
+	default:
+		panic("No or wrong Actions provided.")
+	}
+	b, _ := json.MarshalIndent(mm, " ", "  ")
+	fmt.Println(string(b))
 
+	// Write to a new File.
+	filename := mm.Id + ".rm.json"
+	file1, _ := os.Create(filename)
+	file1.Write(b)
+	file1.Close()
+
+	os.Exit(1)
+}
+
+func fn_add_column(mm *m.UpDown) {
 	fieldArray := os.Args[4:len(os.Args)]
-
 	for key, value := range fieldArray {
 		fieldArray[key] = strings.Trim(value, ", ")
-
 		r, _ := regexp.Compile(FIELD_DATATYPE_REGEXP)
 		if r.MatchString(fieldArray[key]) == true {
 			split := r.FindAllStringSubmatch(fieldArray[key], -1)
-			fmt.Println(split[0][1])
-			fmt.Println(split[0][2])
+			ac := m.AddColumn{}
+			ac.Table_Name = os.Args[3]
+			ac.Column_Name = split[0][1]
+			ac.Data_Type = split[0][2]
+			mm.Add_Column = append(mm.Add_Column, ac)
 		}
-
-		// fds, err := fld_dtype_sep(fieldArray[key])
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	os.Exit(1)
-		// }
-		// f_name, f_data_type, f_required, f_min, f_max := fds[0], fds[1], fds[2], fds[3], fds[4]
 	}
+}
 
+func fn_remove_column(mm *m.UpDown) {
+	rc := m.RemoveColumn{}
+	rc.Table_Name = os.Args[3]
+	fieldArray := os.Args[4:len(os.Args)]
+	for key, value := range fieldArray {
+		fieldArray[key] = strings.Trim(value, ", ")
+		r, _ := regexp.Compile(FIELD_DATATYPE_REGEXP)
+		if r.MatchString(fieldArray[key]) == true {
+			split := r.FindAllStringSubmatch(fieldArray[key], -1)
+			rc.Column_Name = split[0][1]
+		}
+	}
+	mm.Remove_Column = append(mm.Remove_Column, rc)
+}
+
+func fn_drop_table(mm *m.UpDown) {
+	dt := m.DropTable{}
+	dt.Table_Name = os.Args[3]
+	mm.Drop_Table = append(mm.Drop_Table, dt)
+}
+
+func fn_create_table(mm *m.UpDown) {
+	ct := m.CreateTable{}
+	ct.Table_Name = os.Args[3]
+	fieldArray := os.Args[4:len(os.Args)]
+	for key, value := range fieldArray {
+		fieldArray[key] = strings.Trim(value, ", ")
+		r, _ := regexp.Compile(FIELD_DATATYPE_REGEXP)
+		if r.MatchString(fieldArray[key]) == true {
+			split := r.FindAllStringSubmatch(fieldArray[key], -1)
+			col := m.Columns{}
+			col.FieldName = split[0][1]
+			col.DataType = split[0][2]
+			ct.Columns = append(ct.Columns, col)
+		}
+	}
+	mm.Create_Table = append(mm.Create_Table, ct)
 }
 
 func migrateUpDown(updown string) {

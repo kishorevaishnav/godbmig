@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	m "../migration"
+	m "github.com/kishorevaishnav/godbmig/migration"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -32,7 +32,11 @@ func ProcessNow(m m.Migration, updown string) {
 			CreateTable(v.Table_Name, values_array)
 		}
 		for _, v := range m.Up.Add_Column {
-			AddColumn(v.Table_Name, v.Column_Name, v.Data_Type)
+			var values_array []string
+			for _, vv := range v.Columns {
+				values_array = append(values_array, vv.FieldName+" "+vv.DataType)
+			}
+			AddColumn(v.Table_Name, v.Column_Name, values_array)
 		}
 		for _, v := range m.Up.Remove_Column {
 			RemoveColumn(v.Table_Name, v.Column_Name)

@@ -1,54 +1,53 @@
 package migration
 
 type Migration struct {
-	Id   string `jpath:"id"`
-	Up   UpDown `jpath:"up"`
-	Down UpDown `jpath:"down"`
+	Id   string `json:"id,omitempty"`
+	Up   UpDown `json:"up,omitempty"`
+	Down UpDown `json:"down,omitempty"`
 }
 
 type UpDown struct {
-	Create_Table  []CreateTable  `jpath:"create_table"`
-	Drop_Table    []DropTable    `jpath:"drop_table"`
-	Add_Column    []AddColumn    `jpath:"add_column"`
-	Remove_Column []RemoveColumn `jpath:"remove_column"`
-	Add_Index     []AddIndex     `jpath:"add_index"`
-	Remove_Index  []RemoveIndex  `jpath:"remove_index"`
-	Sql           string         `jpath:"sql"`
+	Create_Table  []CreateTable  `json:"create_table,omitempty"`
+	Drop_Table    []DropTable    `json:"drop_table,omitempty"`
+	Add_Column    []AddColumn    `json:"add_column,omitempty"`
+	Remove_Column []RemoveColumn `json:"remove_column,omitempty"`
+	Add_Index     []AddIndex     `json:"add_index,omitempty"`
+	Remove_Index  []RemoveIndex  `json:"remove_index,omitempty"`
+	Sql           string         `json:"sql,omitempty"`
 }
 
 type CreateTable struct {
-	Table_Name string    `jpath:"table_name"`
-	Columns    []Columns `jpath:"columns"`
+	Table_Name string    `json:"table_name,omitempty"`
+	Columns    []Columns `json:"columns,omitempty"`
 }
 
 type DropTable struct {
-	Table_Name string `jpath:"table_name"`
+	Table_Name string `json:"table_name,omitempty"`
 }
 
 type AddColumn struct {
-	Table_Name  string `jpath:"table_name"`
-	Column_Name string `jpath:"column_name"`
-	Data_Type   string `jpath:"data_type"`
+	Table_Name string    `json:"table_name,omitempty"`
+	Columns    []Columns `json:"columns,omitempty"`
 }
 
 type RemoveColumn struct {
-	Table_Name  string `jpath:"table_name"`
-	Column_Name string `jpath:"column_name"`
+	Table_Name string    `json:"table_name,omitempty"`
+	Columns    []Columns `json:"columns,omitempty"`
 }
 
 type AddIndex struct {
-	Table_Name string    `jpath:"table_name"`
-	Index_Type string    `jpath:"index_type"`
-	Columns    []Columns `jpath:"columns"`
+	Table_Name string    `json:"table_name,omitempty"`
+	Index_Type string    `json:"index_type,omitempty"`
+	Columns    []Columns `json:"columns,omitempty"`
 }
 
 type RemoveIndex struct {
-	Table_Name string    `jpath:"table_name"`
-	Index_Type string    `jpath:"index_type"`
-	Columns    []Columns `jpath:"columns"`
+	Table_Name string    `json:"table_name,omitempty"`
+	Index_Type string    `json:"index_type,omitempty"`
+	Columns    []Columns `json:"columns,omitempty"`
 }
 
 type Columns struct {
-	FieldName string `jpath:"fieldname"`
-	DataType  string `jpath:"datatype"`
+	FieldName string `json:"fieldname,omitempty"`
+	DataType  string `json:"datatype,omitempty"`
 }

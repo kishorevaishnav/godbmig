@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	m "../migration"
+	m "github.com/kishorevaishnav/godbmig/migration"
 
 	_ "github.com/lib/pq"
 )
