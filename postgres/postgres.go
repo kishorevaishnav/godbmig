@@ -32,10 +32,14 @@ func ProcessNow(m m.Migration, updown string) {
 			CreateTable(v.Table_Name, values_array)
 		}
 		for _, v := range m.Up.Add_Column {
-			AddColumn(v.Table_Name, v.Column_Name, v.Data_Type)
+			for _, vv := range v.Columns {
+				AddColumn(v.Table_Name, vv.FieldName, vv.DataType)
+			}
 		}
 		for _, v := range m.Up.Remove_Column {
-			RemoveColumn(v.Table_Name, v.Column_Name)
+			for _, vv := range v.Columns {
+				RemoveColumn(v.Table_Name, vv.FieldName)
+			}
 		}
 		for _, v := range m.Up.Add_Index {
 			var fieldname_array []string
@@ -75,7 +79,7 @@ func DropTable(table_name string) {
 }
 
 func AddColumn(table_name string, column_name string, data_type string) {
-	query := "ALTER TABLE " + table_name + " CHANGE " + column_name + " " + data_type
+	query := "ALTER TABLE " + table_name + " ADD " + column_name + " " + data_type
 	execQuery(query)
 	return
 }

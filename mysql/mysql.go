@@ -31,15 +31,18 @@ func ProcessNow(m m.Migration, updown string) {
 			}
 			CreateTable(v.Table_Name, values_array)
 		}
-		for _, v := range m.Up.Add_Column {
-			var values_array []string
-			for _, vv := range v.Columns {
-				values_array = append(values_array, vv.FieldName+" "+vv.DataType)
-			}
-			AddColumn(v.Table_Name, v.Column_Name, values_array)
+		for _, v := range m.Up.Drop_Table {
+			DropTable(v.Table_Name)
 		}
-		for _, v := range m.Up.Remove_Column {
-			RemoveColumn(v.Table_Name, v.Column_Name)
+		for _, v := range m.Up.Add_Column {
+			for _, vv := range v.Columns {
+				AddColumn(v.Table_Name, vv.FieldName, vv.DataType)
+			}
+		}
+		for _, v := range m.Up.Drop_Column {
+			for _, vv := range v.Columns {
+				DropColumn(v.Table_Name, vv.FieldName)
+			}
 		}
 		for _, v := range m.Up.Add_Index {
 			var fieldname_array []string
@@ -48,12 +51,12 @@ func ProcessNow(m m.Migration, updown string) {
 			}
 			AddIndex(v.Table_Name, v.Index_Type, fieldname_array)
 		}
-		for _, v := range m.Up.Remove_Index {
+		for _, v := range m.Up.Drop_Index {
 			var fieldname_array []string
 			for _, vv := range v.Columns {
 				fieldname_array = append(fieldname_array, vv.FieldName)
 			}
-			RemoveIndex(v.Table_Name, v.Index_Type, fieldname_array)
+			DropIndex(v.Table_Name, v.Index_Type, fieldname_array)
 		}
 	}
 }
@@ -79,12 +82,12 @@ func DropTable(table_name string) {
 }
 
 func AddColumn(table_name string, column_name string, data_type string) {
-	query := "ALTER TABLE " + table_name + " CHANGE " + column_name + " " + data_type
+	query := "ALTER TABLE " + table_name + " ADD " + column_name + " " + data_type
 	execQuery(query)
 	return
 }
 
-func RemoveColumn(table_name string, column_name string) {
+func DropColumn(table_name string, column_name string) {
 	query := "ALTER TABLE " + table_name + " DROP " + column_name
 	execQuery(query)
 	return
@@ -98,7 +101,7 @@ func AddIndex(table_name string, index_type string, field []string) {
 	return
 }
 
-func RemoveIndex(table_name string, index_type string, field []string) {
+func DropIndex(table_name string, index_type string, field []string) {
 	sort.Strings(field)
 	tmp_index_name := strings.ToLower(strings.Join(field, "_") + "_index")
 	query := ""
