@@ -33,15 +33,20 @@ Generate
 ./godbmig add drop_column test123 id
 ./godbmig add sql 
 ```
+
 Migration Up
 ```
 ./godbmig up
 ```
+
 Not Working
 Generate
+```
 ./godbmig add rename_table old_test123 new_test123
 ./godbmig add add_index test123 id name
+```
 
+```
     # * add_column
     # * add_index
     # * add_timestamps
