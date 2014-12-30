@@ -36,7 +36,7 @@ func ProcessNow(m m.Migration, updown string) {
 				AddColumn(v.Table_Name, vv.FieldName, vv.DataType)
 			}
 		}
-		for _, v := range m.Up.Remove_Column {
+		for _, v := range m.Up.Drop_Column {
 			for _, vv := range v.Columns {
 				RemoveColumn(v.Table_Name, vv.FieldName)
 			}
@@ -48,7 +48,7 @@ func ProcessNow(m m.Migration, updown string) {
 			}
 			AddIndex(v.Table_Name, v.Index_Type, fieldname_array)
 		}
-		for _, v := range m.Up.Remove_Index {
+		for _, v := range m.Up.Drop_Index {
 			var fieldname_array []string
 			for _, vv := range v.Columns {
 				fieldname_array = append(fieldname_array, vv.FieldName)

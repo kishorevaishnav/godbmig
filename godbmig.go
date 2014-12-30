@@ -78,7 +78,37 @@ func generateMigration() {
 }
 
 func fn_add_index(mm_up *m.UpDown, mm_down *m.UpDown) {
+	ct := m.CreateTable{}
+	ct.Table_Name = os.Args[3]
+	fieldArray := os.Args[4:len(os.Args)]
+	for key, value := range fieldArray {
+		fieldArray[key] = strings.Trim(value, ", ")
+		r, _ := regexp.Compile(FIELD_DATATYPE_REGEXP)
+		if r.MatchString(fieldArray[key]) == true {
+			split := r.FindAllStringSubmatch(fieldArray[key], -1)
+			col := m.Columns{}
+			col.FieldName = split[0][1]
+			col.DataType = split[0][2]
+			ct.Columns = append(ct.Columns, col)
+		}
+	}
+	mm.Create_Table = append(mm.Create_Table, ct)
 
+	ai := m.AddIndex{}
+	ai.Table_Name = os.Args[3]
+	fieldArray := os.Args[4:len(os.Args)]
+	for key, value := range fieldArray {
+		fieldArray[key] = strings.Trim(value, ", ")
+		r, _ := regexp.Compile(FIELD_DATATYPE_REGEXP)
+		if r.MatchString(fieldArray[key]) == true {
+			split := r.FindAllStringSubmatch(fieldArray[key], -1)
+			col := m.Columns{}
+			col.FieldName = split[0][1]
+			col.DataType = split[0][2]
+			ai.Columns = append(ai.Columns, col)
+		}
+	}
+	mm_up.Add_Index = append(mm_up.Add_Index, ai)
 }
 
 func fn_change_column(mm_up *m.UpDown, mm_down *m.UpDown) {
@@ -88,6 +118,7 @@ func fn_rename_column(mm_up *m.UpDown, mm_down *m.UpDown) {
 }
 
 func fn_rename_table(mm_up *m.UpDown, mm_down *m.UpDown) {
+
 }
 
 func fn_add_column(mm *m.UpDown) {
