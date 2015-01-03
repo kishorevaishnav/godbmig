@@ -26,6 +26,8 @@ TODO
 * MySQL - Rename Table.
 * - sql: parameter.
 
+* Check if the create_table <tablename> already exists 
+
 Working
 Generate
 ```
@@ -57,6 +59,7 @@ Generate
     # * rename_column
     # * rename_index
     # * rename_table
+```
 ```
 godbmig down -1
 ```

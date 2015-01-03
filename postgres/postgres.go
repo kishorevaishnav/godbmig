@@ -14,9 +14,16 @@ import (
 
 var Db *sql.DB
 
+func init() {
+	// fmt.Println("postgres init() it runs before other functions")
+}
+
 func Init() {
 	fmt.Println("Inside the Postgres")
 	Db, _ = sql.Open("mysql", "root:root@/onetest")
+}
+
+func CreateMigrationTable() {
 }
 
 func ProcessNow(m m.Migration, updown string) {

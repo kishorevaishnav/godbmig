@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -18,22 +19,55 @@ import (
 
 const FIELD_DATATYPE_REGEXP = `^([A-Za-z]{2,15}):([A-Za-z]{2,15})`
 
+var Config m.Config
+var ArgArr []string
+
 func main() {
 	if strings.LastIndex(os.Args[0], "godbmig") < 1 {
 		fmt.Println("wrong usage")
 		os.Exit(1)
 	}
-	switch os.Args[1] {
+	switch ArgArr[0] {
 	case "add", "a":
 		generateMigration()
 	case "up", "u":
 		migrateUpDown("up")
 	case "down", "d":
 		migrateUpDown("down")
+	case "create", "c":
+		createMigration()
 	default:
 		panic("No or Wrong Actions provided.")
 	}
 	os.Exit(1)
+}
+
+func init() {
+	// fmt.Println("godbmig init() it runs before other functions")
+	var un, pw, dbname, host, port string
+	flag.StringVar(&un, "u", "", "specify the database username")
+	flag.StringVar(&pw, "p", "", "specify the database password")
+	flag.StringVar(&dbname, "d", "", "specify the database name")
+	flag.StringVar(&host, "h", "localhost", "specify the database hostname")
+	flag.StringVar(&port, "port", "5432", "specify the database port")
+	flag.Parse()
+	Config.Db_username = un
+	Config.Db_password = pw
+	Config.Db_name = dbname
+	Config.Db_hostname = host
+	Config.Db_portnumber = port
+	ArgArr = flag.Args()
+}
+
+func createMigration() {
+	a := "mysql"
+	if a == "mysql" {
+		gdm_my.Init(Config)
+		gdm_my.CreateMigrationTable()
+	} else {
+		gdm_pq.Init()
+		gdm_pq.CreateMigrationTable()
+	}
 }
 
 func generateMigration() {
@@ -41,7 +75,7 @@ func generateMigration() {
 	t := time.Now()
 	mm := m.Migration{}
 	mm.Id = "3" + t.Format(layout)
-	switch os.Args[2] {
+	switch ArgArr[1] {
 	case "create_table", "ct":
 		fn_create_table(&mm.Up)
 		fn_drop_table(&mm.Down)
@@ -56,12 +90,12 @@ func generateMigration() {
 	case "drop_column", "dc":
 		fn_drop_column(&mm.Up)
 		fn_add_column(&mm.Down)
-	case "change_column", "cc":
-		fn_change_column(&mm.Up, &mm.Down)
-	case "rename_column", "rc":
-		fn_rename_column(&mm.Up, &mm.Down)
-	case "add_index", "ai":
-		fn_add_index(&mm.Up, &mm.Down)
+	// case "change_column", "cc":
+	// 	fn_change_column(&mm.Up, &mm.Down)
+	// case "rename_column", "rc":
+	// 	fn_rename_column(&mm.Up, &mm.Down)
+	// case "add_index", "ai":
+	// 	fn_add_index(&mm.Up, &mm.Down)
 	default:
 		panic("No or wrong Actions provided.")
 	}
@@ -78,37 +112,37 @@ func generateMigration() {
 }
 
 func fn_add_index(mm_up *m.UpDown, mm_down *m.UpDown) {
-	ct := m.CreateTable{}
-	ct.Table_Name = os.Args[3]
-	fieldArray := os.Args[4:len(os.Args)]
-	for key, value := range fieldArray {
-		fieldArray[key] = strings.Trim(value, ", ")
-		r, _ := regexp.Compile(FIELD_DATATYPE_REGEXP)
-		if r.MatchString(fieldArray[key]) == true {
-			split := r.FindAllStringSubmatch(fieldArray[key], -1)
-			col := m.Columns{}
-			col.FieldName = split[0][1]
-			col.DataType = split[0][2]
-			ct.Columns = append(ct.Columns, col)
-		}
-	}
-	mm.Create_Table = append(mm.Create_Table, ct)
+	// ct := m.CreateTable{}
+	// ct.Table_Name = ArgArr[2]
+	// fieldArray := ArgArr[3:len(ArgArr)]
+	// for key, value := range fieldArray {
+	// 	fieldArray[key] = strings.Trim(value, ", ")
+	// 	r, _ := regexp.Compile(FIELD_DATATYPE_REGEXP)
+	// 	if r.MatchString(fieldArray[key]) == true {
+	// 		split := r.FindAllStringSubmatch(fieldArray[key], -1)
+	// 		col := m.Columns{}
+	// 		col.FieldName = split[0][1]
+	// 		col.DataType = split[0][2]
+	// 		ct.Columns = append(ct.Columns, col)
+	// 	}
+	// }
+	// mm.Create_Table = append(mm.Create_Table, ct)
 
-	ai := m.AddIndex{}
-	ai.Table_Name = os.Args[3]
-	fieldArray := os.Args[4:len(os.Args)]
-	for key, value := range fieldArray {
-		fieldArray[key] = strings.Trim(value, ", ")
-		r, _ := regexp.Compile(FIELD_DATATYPE_REGEXP)
-		if r.MatchString(fieldArray[key]) == true {
-			split := r.FindAllStringSubmatch(fieldArray[key], -1)
-			col := m.Columns{}
-			col.FieldName = split[0][1]
-			col.DataType = split[0][2]
-			ai.Columns = append(ai.Columns, col)
-		}
-	}
-	mm_up.Add_Index = append(mm_up.Add_Index, ai)
+	// ai := m.AddIndex{}
+	// ai.Table_Name = ArgArr[2]
+	// fieldArray = ArgArr[3:len(ArgArr)]
+	// for key, value := range fieldArray {
+	// 	fieldArray[key] = strings.Trim(value, ", ")
+	// 	r, _ := regexp.Compile(FIELD_DATATYPE_REGEXP)
+	// 	if r.MatchString(fieldArray[key]) == true {
+	// 		split := r.FindAllStringSubmatch(fieldArray[key], -1)
+	// 		col := m.Columns{}
+	// 		col.FieldName = split[0][1]
+	// 		col.DataType = split[0][2]
+	// 		ai.Columns = append(ai.Columns, col)
+	// 	}
+	// }
+	// mm_up.Add_Index = append(mm_up.Add_Index, ai)
 }
 
 func fn_change_column(mm_up *m.UpDown, mm_down *m.UpDown) {
@@ -123,8 +157,8 @@ func fn_rename_table(mm_up *m.UpDown, mm_down *m.UpDown) {
 
 func fn_add_column(mm *m.UpDown) {
 	ac := m.AddColumn{}
-	ac.Table_Name = os.Args[3]
-	fieldArray := os.Args[4:len(os.Args)]
+	ac.Table_Name = ArgArr[2]
+	fieldArray := ArgArr[3:len(ArgArr)]
 	for key, value := range fieldArray {
 		fieldArray[key] = strings.Trim(value, ", ")
 		r, _ := regexp.Compile(FIELD_DATATYPE_REGEXP)
@@ -134,6 +168,8 @@ func fn_add_column(mm *m.UpDown) {
 			col.FieldName = split[0][1]
 			col.DataType = split[0][2]
 			ac.Columns = append(ac.Columns, col)
+		} else {
+			ac = m.AddColumn{}
 		}
 	}
 	mm.Add_Column = append(mm.Add_Column, ac)
@@ -141,17 +177,22 @@ func fn_add_column(mm *m.UpDown) {
 
 func fn_drop_column(mm *m.UpDown) {
 	dc := m.DropColumn{}
-	dc.Table_Name = os.Args[3]
-	fieldArray := os.Args[4:len(os.Args)]
+	dc.Table_Name = ArgArr[2]
+	fieldArray := ArgArr[3:len(ArgArr)]
 	for key, value := range fieldArray {
 		fieldArray[key] = strings.Trim(value, ", ")
 		r, _ := regexp.Compile(FIELD_DATATYPE_REGEXP)
+		col := m.Columns{}
 		if r.MatchString(fieldArray[key]) == true {
 			split := r.FindAllStringSubmatch(fieldArray[key], -1)
-			col := m.Columns{}
 			col.FieldName = split[0][1]
-			col.DataType = "" // split[0][2]   // Ignore this value as its not needed for Removing Columns.
+			col.DataType = split[0][2]
 			dc.Columns = append(dc.Columns, col)
+		} else if fieldArray[key] != "" {
+			col.FieldName = fieldArray[key]
+			dc.Columns = append(dc.Columns, col)
+		} else {
+			dc = m.DropColumn{}
 		}
 	}
 	mm.Drop_Column = append(mm.Drop_Column, dc)
@@ -159,14 +200,14 @@ func fn_drop_column(mm *m.UpDown) {
 
 func fn_drop_table(mm *m.UpDown) {
 	dt := m.DropTable{}
-	dt.Table_Name = os.Args[3]
+	dt.Table_Name = ArgArr[2]
 	mm.Drop_Table = append(mm.Drop_Table, dt)
 }
 
 func fn_create_table(mm *m.UpDown) {
 	ct := m.CreateTable{}
-	ct.Table_Name = os.Args[3]
-	fieldArray := os.Args[4:len(os.Args)]
+	ct.Table_Name = ArgArr[2]
+	fieldArray := ArgArr[3:len(ArgArr)]
 	for key, value := range fieldArray {
 		fieldArray[key] = strings.Trim(value, ", ")
 		r, _ := regexp.Compile(FIELD_DATATYPE_REGEXP)
@@ -195,6 +236,7 @@ func migrateUpDown(updown string) {
 			json.Unmarshal(docScript, &mm)
 			a := "mysql"
 			if a == "mysql" {
+				gdm_my.Init(Config)
 				gdm_my.ProcessNow(mm, updown)
 			} else {
 				gdm_pq.ProcessNow(mm, updown)

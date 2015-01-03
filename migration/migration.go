@@ -1,5 +1,13 @@
 package migration
 
+type Config struct {
+	Db_username   string
+	Db_password   string
+	Db_name       string
+	Db_hostname   string
+	Db_portnumber string
+}
+
 type Migration struct {
 	Id   string `xml:"id,omitempty" json:"id,omitempty"`
 	Up   UpDown `xml:"up,omitempty" json:"up,omitempty"`

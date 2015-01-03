@@ -3,6 +3,7 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -13,13 +14,69 @@ import (
 )
 
 var Db *sql.DB
+var new_version string
 
-func Init() {
-	fmt.Println("Inside the MySQL")
-	Db, _ = sql.Open("mysql", "root:root@/onetest")
+func init() {
+	// This can be useful to check for version and any other dependencies etc.,
+	// fmt.Println("mysql init() it runs before other functions")
+}
+
+func Init(c m.Config) {
+	Db, _ = sql.Open("mysql", c.Db_username+":"+c.Db_password+"@/"+c.Db_name)
+}
+
+func getLastMigrationNo() string {
+	var max_version string = ""
+	query := "SELECT max(`version`) FROM `schema_migrations`"
+	q, err := Db.Query(query)
+	defer q.Close()
+	if err != nil {
+		log.Println("schema_migrations table doesn't exists")
+		log.Fatal(err)
+	} else {
+		q.Next()
+		q.Scan(&max_version)
+	}
+	return max_version
+}
+
+func CreateMigrationTable() {
+	query := "CREATE TABLE `schema_migrations` (version VARCHAR(255))"
+	q, err := Db.Query(query)
+	defer q.Close()
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println("Table Created Successfully.")
+	}
+}
+
+func updateMigrationTable() {
+	query := "INSERT INTO `schema_migrations`(version) VALUES ('" + new_version + "')"
+	q, err := Db.Query(query)
+	defer q.Close()
+	if err != nil {
+		log.Println("not able to add version to the existing migration table")
+		log.Fatal(err)
+	}
+}
+
+func datatype_conversion(dt string) string {
+	switch dt {
+	case "string":
+		return "VARCHAR(255)"
+	case "int":
+		return "INTEGER"
+	}
+	return dt
 }
 
 func ProcessNow(m m.Migration, updown string) {
+	if m.Id <= getLastMigrationNo() {
+		return
+	} else {
+		new_version = m.Id
+	}
 	nid, _ := strconv.Atoi(m.Id)
 	if nid != 0 {
 		fmt.Println("ID : ", m.Id)
@@ -27,7 +84,7 @@ func ProcessNow(m m.Migration, updown string) {
 		for _, v := range m.Up.Create_Table {
 			var values_array []string
 			for _, vv := range v.Columns {
-				values_array = append(values_array, vv.FieldName+" "+vv.DataType)
+				values_array = append(values_array, "`"+vv.FieldName+"` "+datatype_conversion(vv.DataType))
 			}
 			CreateTable(v.Table_Name, values_array)
 		}
@@ -36,37 +93,40 @@ func ProcessNow(m m.Migration, updown string) {
 		}
 		for _, v := range m.Up.Add_Column {
 			for _, vv := range v.Columns {
-				AddColumn(v.Table_Name, vv.FieldName, vv.DataType)
+				AddColumn(v.Table_Name, "`"+vv.FieldName+"` ", datatype_conversion(vv.DataType))
 			}
 		}
 		for _, v := range m.Up.Drop_Column {
 			for _, vv := range v.Columns {
-				DropColumn(v.Table_Name, vv.FieldName)
+				DropColumn(v.Table_Name, "`"+vv.FieldName+"` ")
 			}
 		}
 		for _, v := range m.Up.Add_Index {
 			var fieldname_array []string
 			for _, vv := range v.Columns {
-				fieldname_array = append(fieldname_array, vv.FieldName)
+				fieldname_array = append(fieldname_array, "`"+vv.FieldName+"` ")
 			}
 			AddIndex(v.Table_Name, v.Index_Type, fieldname_array)
 		}
 		for _, v := range m.Up.Drop_Index {
 			var fieldname_array []string
 			for _, vv := range v.Columns {
-				fieldname_array = append(fieldname_array, vv.FieldName)
+				fieldname_array = append(fieldname_array, "`"+vv.FieldName+"` ")
 			}
 			DropIndex(v.Table_Name, v.Index_Type, fieldname_array)
 		}
 	}
 }
+
 func execQuery(query string) {
 	fmt.Println("MySQL---" + query)
-	// q, err := Db.Query(query)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer q.Close()
+	q, err := Db.Query(query)
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		updateMigrationTable()
+	}
+	defer q.Close()
 }
 
 func CreateTable(table_name string, field_datatype []string) {
